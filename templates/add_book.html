@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Book' if book else 'Add Book Listing' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="form-card" style="max-width:680px;">
+    <h2>{{ '✏️ Edit Listing' if book else '➕ Add Book Listing' }}</h2>
+
+    <form method="POST"
+          action="{{ url_for('edit_book', book_id=book.id) if book else url_for('add_book') }}"
+          enctype="multipart/form-data">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Book Title *</label>
+          <input type="text" name="title" required placeholder="e.g. The Alchemist"
+                 value="{{ book.title if book else '' }}"/>
+        </div>
+        <div class="form-group">
+          <label>Author *</label>
+          <input type="text" name="author" required placeholder="e.g. Paulo Coelho"
+                 value="{{ book.author if book else '' }}"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category">
+            {% for cat in ['Fiction','Non-Fiction','Textbook','Science','Technology','History','Biography','Children','Religious','Other'] %}
+              <option value="{{ cat }}" {% if book and book.category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Condition</label>
+          <select name="condition">
+            {% for cond in ['Like New','Good','Fair','Worn'] %}
+              <option value="{{ cond }}" {% if book and book.condition == cond %}selected{% endif %}>{{ cond }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Listing Type</label>
+          <select name="listing_type" id="listingType" onchange="togglePrice()">
+            <option value="donate" {% if not book or book.listing_type == 'donate' %}selected{% endif %}>🎁 Donate (Free)</option>
+            <option value="sell"   {% if book and book.listing_type == 'sell' %}selected{% endif %}>💰 Sell</option>
+          </select>
+        </div>
+        <div class="form-group" id="priceGroup" style="{{ 'display:none' if not book or book.listing_type == 'donate' else '' }}">
+          <label>Price (₹)</label>
+          <input type="number" name="price" min="0" step="1"
+                 value="{{ book.price|int if book else 0 }}" placeholder="0"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Your City / Location *</label>
+        <input type="text" name="location" required placeholder="e.g. Mumbai"
+               value="{{ book.location if book else '' }}"/>
+      </div>
+
+      <div class="form-group">
+        <label>Description (optional)</label>
+        <textarea name="description" rows="3"
+                  placeholder="Brief description of the book…">{{ book.description if book else '' }}</textarea>
+      </div>
+
+      {% if not book %}
+      <div class="form-group">
+        <label>Book Cover Image (optional)</label>
+        <input type="file" name="image" accept=".jpg,.jpeg,.png"/>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary btn-block">
+        {{ '💾 Save Changes' if book else '📚 Publish Listing' }}
+      </button>
+
+      {% if book %}
+      <a href="{{ url_for('my_books') }}" class="btn btn-gray btn-block" style="margin-top:8px;">Cancel</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePrice() {
+  const type  = document.getElementById('listingType').value;
+  const group = document.getElementById('priceGroup');
+  group.style.display = type === 'sell' ? '' : 'none';
+}
+</script>
+{% endblock %}

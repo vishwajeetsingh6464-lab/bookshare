@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 style="margin-bottom:20px;">💬 Messages</h2>
+
+  <div class="messages-layout">
+    <!-- Inbox panel -->
+    <div class="inbox-panel">
+      <h3>📬 Inbox</h3>
+      {% if inbox %}
+        {% for contact in inbox %}
+          <a href="{{ url_for('messages', **{'with': contact.other_id}) }}"
+             class="inbox-item {% if chat_with == contact.other_id %}active{% endif %}">
+            👤 {{ contact.other_name }}
+          </a>
+        {% endfor %}
+      {% else %}
+        <p style="padding:16px 18px;font-size:13px;color:#94a3b8;">No conversations yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Chat panel -->
+    <div class="chat-panel">
+      {% if partner %}
+        <div class="chat-header">Chat with {{ partner.name }}</div>
+        <div class="chat-body">
+          {% if msgs %}
+            {% for m in msgs %}
+              {% if m.sender_id == user.id %}
+                <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                  <div class="msg-right">{{ m.content }}</div>
+                  <div class="msg-time">{{ m.created_at[11:16] }}</div>
+                </div>
+              {% else %}
+                <div style="display:flex;flex-direction:column;align-items:flex-start;">
+                  <div class="msg-left">{{ m.content }}</div>
+                  <div class="msg-time">{{ m.sender_name }} · {{ m.created_at[11:16] }}</div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p style="color:#94a3b8;text-align:center;margin:auto;">No messages yet. Say hello! 👋</p>
+          {% endif %}
+        </div>
+        <form class="chat-input" method="POST" action="{{ url_for('send_message') }}">
+          <input type="hidden" name="receiver_id" value="{{ partner.id }}"/>
+          <input type="text" name="content" placeholder="Type a message…" required autocomplete="off"/>
+          <button type="submit" class="btn btn-primary">Send ➤</button>
+        </form>
+      {% else %}
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;padding:40px;text-align:center;">
+          <div>
+            <p style="font-size:3rem;">💬</p>
+            <p>Select a conversation from the inbox,<br>or open a chat from a book listing.</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

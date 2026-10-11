@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>📚 BookShare</h1>
+    <p>Give books a second life — donate or resell used books to students, libraries, and NGOs.<br>
+       Every book shared is a step toward a more literate world.</p>
+    <div class="hero-btns">
+      <a href="{{ url_for('browse') }}" class="btn btn-primary">🔍 Browse Books</a>
+      {% if not user %}
+        <a href="{{ url_for('register') }}" class="btn btn-gray" style="background:rgba(255,255,255,.2);color:#fff;">📝 Join Free</a>
+      {% else %}
+        <a href="{{ url_for('add_book') }}" class="btn btn-gray" style="background:rgba(255,255,255,.2);color:#fff;">➕ Add a Listing</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="num">{{ stats.books }}</div>
+      <div class="lbl">📚 Books Listed</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ stats.donations }}</div>
+      <div class="lbl">🎁 Free Donations</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ stats.users }}</div>
+      <div class="lbl">👥 Registered Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ stats.completed }}</div>
+      <div class="lbl">✅ Exchanges Completed</div>
+    </div>
+  </div>
+
+  <!-- Recent listings -->
+  <div class="section-header">
+    <h2>🆕 Recent Listings</h2>
+    <a href="{{ url_for('browse') }}" class="btn btn-outline btn-sm">View All →</a>
+  </div>
+
+  {% if recent %}
+  <div class="books-grid">
+    {% for book in recent %}
+    <div class="book-card">
+      <h3>{{ book.title }}</h3>
+      <div class="meta">by {{ book.author }}</div>
+      <div class="meta">🏷️ {{ book.category or '—' }} &nbsp;|&nbsp; {{ book.condition or '—' }}</div>
+      <div class="meta">📍 {{ book.location or '—' }} &nbsp;|&nbsp; 👤 {{ book.owner }}</div>
+      <div>
+        {% if book.listing_type == 'donate' %}
+          <span class="badge badge-donate">🎁 Free Donation</span>
+        {% else %}
+          <span class="badge badge-sell">💰 ₹{{ book.price|int }}</span>
+        {% endif %}
+      </div>
+      <div class="actions">
+        <a href="{{ url_for('book_detail', book_id=book.id) }}" class="btn btn-primary btn-sm">View Details</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:#64748b;">No books listed yet. <a href="{{ url_for('add_book') }}">Be the first!</a></p>
+  {% endif %}
+
+  <!-- Social impact -->
+  <div class="impact-box">
+    <h3>🌱 Our Social Impact</h3>
+    <p>BookShare helps bridge the knowledge gap by making books accessible to everyone.</p>
+    <ul>
+      <li>📖 Donate textbooks to underprivileged students</li>
+      <li>🏫 Support school and community libraries</li>
+      <li>♻️ Reduce waste by giving books a second life</li>
+      <li>🤝 Connect donors directly with those in need</li>
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

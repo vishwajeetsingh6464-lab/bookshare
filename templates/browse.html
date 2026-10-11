@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Browse Books{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 style="margin-bottom:20px;">🔍 Browse Books</h2>
+
+  <!-- Search & Filters -->
+  <form method="GET" action="{{ url_for('browse') }}">
+    <div class="search-bar">
+      <div class="sg" style="flex:2;">
+        <label>Search</label>
+        <input type="text" name="search" value="{{ search }}" placeholder="Title or author…"/>
+      </div>
+      <div class="sg">
+        <label>Category</label>
+        <select name="category">
+          <option value="">All Categories</option>
+          {% for cat in ['Fiction','Non-Fiction','Textbook','Science','Technology','History','Biography','Children','Religious','Other'] %}
+            <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="sg">
+        <label>Condition</label>
+        <select name="condition">
+          <option value="">Any Condition</option>
+          {% for cond in ['Like New','Good','Fair','Worn'] %}
+            <option value="{{ cond }}" {% if condition == cond %}selected{% endif %}>{{ cond }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="sg">
+        <label>Type</label>
+        <select name="listing_type">
+          <option value="">All Types</option>
+          <option value="donate" {% if ltype == 'donate' %}selected{% endif %}>🎁 Donate only</option>
+          <option value="sell"   {% if ltype == 'sell'   %}selected{% endif %}>💰 Sell only</option>
+        </select>
+      </div>
+      <div class="sg">
+        <label>Location</label>
+        <input type="text" name="location" value="{{ location }}" placeholder="City…"/>
+      </div>
+      <div class="sg" style="justify-content:flex-end;">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </div>
+  </form>
+
+  <p style="color:#64748b;margin-bottom:16px;font-size:14px;">
+    <strong>{{ books|length }}</strong> book(s) found
+  </p>
+
+  {% if books %}
+  <div class="books-grid">
+    {% for book in books %}
+    <div class="book-card">
+      {% if book.image %}
+        <img src="{{ url_for('static', filename='uploads/' + book.image) }}"
+             style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:8px;" alt="cover"/>
+      {% endif %}
+      <h3>{{ book.title }}</h3>
+      <div class="meta">by {{ book.author }}</div>
+      <div class="meta">🏷️ {{ book.category or '—' }} &nbsp;|&nbsp; {{ book.condition or '—' }}</div>
+      <div class="meta">📍 {{ book.location or '—' }} &nbsp;|&nbsp; 👤 {{ book.owner }}</div>
+      <div style="margin-top:6px;">
+        {% if book.listing_type == 'donate' %}
+          <span class="badge badge-donate">🎁 Free Donation</span>
+        {% else %}
+          <span class="badge badge-sell">💰 ₹{{ book.price|int }}</span>
+        {% endif %}
+      </div>
+      <div class="actions">
+        <a href="{{ url_for('book_detail', book_id=book.id) }}" class="btn btn-primary btn-sm">View & Request →</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:48px;color:#64748b;">
+    <p style="font-size:3rem;">📭</p>
+    <p>No books match your search. Try different filters.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <a href="{{ url_for('browse') }}" style="font-size:14px;color:#64748b;">← Back to Browse</a>
+  <br><br>
+
+  <div class="detail-grid">
+    <!-- Left: Book info -->
+    <div class="detail-card">
+      {% if book.image %}
+        <img src="{{ url_for('static', filename='uploads/' + book.image) }}"
+             style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;margin-bottom:20px;" alt="cover"/>
+      {% endif %}
+      <h1>{{ book.title }}</h1>
+      <p style="color:#64748b;font-size:15px;">by <strong>{{ book.author }}</strong></p>
+
+      <div class="detail-meta">
+        <span>🏷️ {{ book.category or 'Uncategorized' }}</span>
+        <span>📋 {{ book.condition or 'Unknown condition' }}</span>
+        <span>📍 {{ book.location or 'Location not set' }}</span>
+        <span>👤 {{ book.owner }}</span>
+        {% if book.listing_type == 'donate' %}
+          <span class="badge badge-donate">🎁 Free Donation</span>
+        {% else %}
+          <span class="badge badge-sell">💰 ₹{{ book.price|int }}</span>
+        {% endif %}
+      </div>
+
+      {% if book.description %}
+      <div style="margin-top:16px;">
+        <h4 style="margin-bottom:8px;">About this book</h4>
+        <p style="color:#475569;font-size:14px;line-height:1.7;">{{ book.description }}</p>
+      </div>
+      {% endif %}
+
+      <p style="font-size:12px;color:#94a3b8;margin-top:20px;">Listed on {{ book.created_at[:10] }}</p>
+    </div>
+
+    <!-- Right: Actions -->
+    <div>
+      <div class="side-card">
+        <h3>📊 Owner Info</h3>
+        <p style="font-size:14px;margin-bottom:6px;"><strong>{{ book.owner }}</strong></p>
+        {% if avg.avg %}
+          <p style="font-size:14px;color:#64748b;">
+            ⭐ {{ "%.1f"|format(avg.avg) }} / 5 &nbsp;({{ avg.cnt }} review{% if avg.cnt != 1 %}s{% endif %})
+          </p>
+        {% else %}
+          <p style="font-size:13px;color:#94a3b8;">No reviews yet</p>
+        {% endif %}
+
+        {% if user %}
+          {% if user.id == book.owner_id %}
+            <div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:8px;font-size:14px;color:#64748b;">
+              This is your own listing.
+              <a href="{{ url_for('edit_book', book_id=book.id) }}" class="btn btn-outline btn-sm" style="margin-top:10px;display:block;text-align:center;">✏️ Edit Listing</a>
+            </div>
+          {% else %}
+            <div style="margin-top:16px;">
+              <h4 style="margin-bottom:12px;font-size:14px;">📬 Send a Request</h4>
+              <form method="POST" action="{{ url_for('request_book', book_id=book.id) }}">
+                <div class="form-group">
+                  <textarea name="message" rows="3" placeholder="Add a message to the owner (optional)…"
+                            style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-family:inherit;font-size:13px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">📬 Send Request</button>
+              </form>
+              <a href="{{ url_for('messages', **{'with': book.owner_id}) }}"
+                 class="btn btn-outline btn-block" style="margin-top:8px;">💬 Message Owner</a>
+            </div>
+          {% endif %}
+        {% else %}
+          <div style="margin-top:16px;padding:14px;background:#fef9c3;border-radius:8px;font-size:14px;color:#854d0e;">
+            Please <a href="{{ url_for('login') }}">login</a> to request this book or message the owner.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

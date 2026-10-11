@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Book Requests{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 style="margin-bottom:20px;">📬 Book Requests</h2>
+
+  <div class="tab-group">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tab-incoming">📥 Incoming ({{ incoming|length }})</button>
+      <button class="tab-btn"        data-tab="tab-outgoing">📤 Outgoing ({{ outgoing|length }})</button>
+    </div>
+
+    <!-- Incoming -->
+    <div class="tab-panel active" id="tab-incoming">
+      {% if not incoming %}
+        <p style="color:#64748b;">No requests on your listings yet.</p>
+      {% else %}
+        {% for req in incoming %}
+        <div class="req-card">
+          <h4>📚 {{ req.book_title }}</h4>
+          <div class="req-meta">
+            From: <strong>{{ req.requester_name }}</strong> ({{ req.requester_email }})
+            &nbsp;·&nbsp; {{ req.created_at[:10] }}
+          </div>
+          {% if req.message %}
+            <p style="font-size:13px;color:#475569;font-style:italic;">"{{ req.message }}"</p>
+          {% endif %}
+          <span class="badge badge-{{ req.status }}">
+            {% if req.status == 'pending'   %}⏳ Pending
+            {% elif req.status == 'accepted' %}✅ Accepted
+            {% elif req.status == 'completed'%}🎉 Completed
+            {% else %}❌ Rejected{% endif %}
+          </span>
+          <div class="req-actions">
+            {% if req.status == 'pending' %}
+              <form method="POST" action="{{ url_for('update_request', req_id=req.id, status='accepted') }}">
+                <button class="btn btn-green btn-sm">✅ Accept</button>
+              </form>
+              <form method="POST" action="{{ url_for('update_request', req_id=req.id, status='rejected') }}">
+                <button class="btn btn-red btn-sm">❌ Reject</button>
+              </form>
+            {% elif req.status == 'accepted' %}
+              <form method="POST" action="{{ url_for('update_request', req_id=req.id, status='completed') }}">
+                <button class="btn btn-primary btn-sm">🎉 Mark Completed</button>
+              </form>
+            {% endif %}
+            <a href="{{ url_for('messages', **{'with': req.requester_id}) }}"
+               class="btn btn-outline btn-sm">💬 Message</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Outgoing -->
+    <div class="tab-panel" id="tab-outgoing">
+      {% if not outgoing %}
+        <p style="color:#64748b;">You haven't sent any requests yet. <a href="{{ url_for('browse') }}">Browse books →</a></p>
+      {% else %}
+        {% for req in outgoing %}
+        <div class="req-card">
+          <h4>📚 {{ req.book_title }}</h4>
+          <div class="req-meta">
+            Owner: <strong>{{ req.owner_name }}</strong>
+            &nbsp;·&nbsp; Requested: {{ req.created_at[:10] }}
+          </div>
+          {% if req.message %}
+            <p style="font-size:13px;color:#475569;font-style:italic;">"{{ req.message }}"</p>
+          {% endif %}
+          <span class="badge badge-{{ req.status }}">
+            {% if req.status == 'pending'   %}⏳ Pending
+            {% elif req.status == 'accepted' %}✅ Accepted — Owner has agreed!
+            {% elif req.status == 'completed'%}🎉 Completed
+            {% else %}❌ Rejected{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
