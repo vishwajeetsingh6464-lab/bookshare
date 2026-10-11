@@ -506,5 +506,5 @@ init_db()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print("\n  BookShare is running!")
-    print(f"  Open Chrome and go to:  http://localhost:{port}\n")
+    print(f"  Open Chrome and go to:  https://bookshare-wq0r.onrender.com\n")
     app.run(host="0.0.0.0", debug=False, port=port)
