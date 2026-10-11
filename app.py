@@ -17,8 +17,12 @@ from flask import (
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-app.secret_key = "bookshare_secret_2024"
-DB_PATH = os.path.join(os.path.dirname(__file__), "bookshare.db")
+app.secret_key = os.environ.get("SECRET_KEY", "bookshare_secret_2024")
+
+# On Render (and most cloud hosts) the app directory is read-only;
+# /tmp is always writable. Fall back to local path when running locally.
+_BASE = "/tmp" if os.path.exists("/tmp") and not os.access(os.path.dirname(__file__), os.W_OK) else os.path.dirname(__file__)
+DB_PATH = os.path.join(_BASE, "bookshare.db")
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -495,9 +499,12 @@ def submit_review():
     return redirect(url_for("reviews"))
 
 
+# ── Init DB on every startup (gunicorn calls module-level code) ───────────────
+init_db()
+
 # ══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    init_db()
-    print("\n  📚 BookShare is running!")
-    print("  Open Chrome and go to:  http://localhost:5000\n")
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    print("\n  BookShare is running!")
+    print(f"  Open Chrome and go to:  http://localhost:{port}\n")
+    app.run(host="0.0.0.0", debug=False, port=port)
